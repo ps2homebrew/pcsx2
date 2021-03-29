@@ -52,7 +52,7 @@ export OUTPUT=$name.AppImage
 
 mkdir /pcsx2/artifacts/
 ls -al .
-mv "$name.AppImage" /pcsx2/artifacts && mv "$name.AppImage.zsync" /pcsx2/artifacts
+mv "$name.AppImage" /pcsx2/artifacts # && mv "$name.AppImage.zsync" /pcsx2/artifacts
 chmod -R 777 ./artifacts
 cd ./artifacts
 ls -al .
