@@ -26,7 +26,6 @@ option(USE_VTUNE "Plug VTUNE to profile GSdx JIT.")
 #-------------------------------------------------------------------------------
 # Graphical option
 #-------------------------------------------------------------------------------
-option(REBUILD_SHADER "Rebuild GLSL/CG shader (developer option)")
 option(BUILD_REPLAY_LOADERS "Build GS replayer to ease testing (developer option)")
 
 #-------------------------------------------------------------------------------
@@ -77,18 +76,10 @@ endif()
 # Select the support of plugin
 #-------------------------------------------------------------------------------
 option(BUILTIN_GS           "Disable support of GS plugin (developer option)")
-option(BUILTIN_PAD          "Disable support of PAD plugin (developer option)")
-option(BUILTIN_USB          "Disable support of USB plugin (developer option)")
 
 set(PLUGIN_SUPPORT "")
 if(BUILTIN_GS)
     set(PLUGIN_SUPPORT "${PLUGIN_SUPPORT} -DBUILTIN_GS_PLUGIN")
-endif()
-if(BUILTIN_PAD)
-    set(PLUGIN_SUPPORT "${PLUGIN_SUPPORT} -DBUILTIN_PAD_PLUGIN")
-endif()
-if(BUILTIN_USB)
-    set(PLUGIN_SUPPORT "${PLUGIN_SUPPORT} -DBUILTIN_USB_PLUGIN")
 endif()
 
 #-------------------------------------------------------------------------------
@@ -235,7 +226,6 @@ endif()
 #-------------------------------------------------------------------------------
 # Set some default compiler flags
 #-------------------------------------------------------------------------------
-option(USE_LTO "Enable LTO optimization")
 option(USE_PGO_GENERATE "Enable PGO optimization (generate profile)")
 option(USE_PGO_OPTIMIZE "Enable PGO optimization (use profile)")
 
@@ -295,18 +285,6 @@ elseif (USE_ICC)
     set(DBG "-g -fno-omit-frame-pointer")
 elseif (USE_GCC)
     set(DBG "-ggdb3 -fno-omit-frame-pointer")
-endif()
-
-if (USE_LTO)
-    include(ProcessorCount)
-    ProcessorCount(ncpu)
-    set(LTO_FLAGS "-fuse-linker-plugin -flto=${ncpu}")
-    set(DBG "") # not supported with LTO
-    set(CMAKE_AR /usr/bin/gcc-ar CACHE STRING "Archiver" FORCE)
-    set(CMAKE_RANLIB /usr/bin/gcc-ranlib CACHE STRING "ranlib" FORCE)
-    set(CMAKE_NM /usr/bin/gcc-nm CACHE STRING "nm" FORCE)
-else()
-    set(LTO_FLAGS "")
 endif()
 
 if (USE_PGO_GENERATE OR USE_PGO_OPTIMIZE)
