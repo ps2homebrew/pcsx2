@@ -1045,9 +1045,13 @@ if(Linux)
 		)
 		
 	set(Platform_Libs
-		${LIBUDEV_LIBRARIES}
-		${X11_LIBRARIES}
+		PkgConfig::AIO
+		PkgConfig::LIBUDEV
+		X11::X11
+		ALSA::ALSA
 		)
+elseif(UNIX)
+	set(Platform_Libs X11::X11)
 endif()
 
 # Windows
@@ -1081,38 +1085,31 @@ set(pcsx2FinalLibs
 	Utilities
 	x86emitter
 	fmt::fmt
-	${wxWidgets_LIBRARIES}
-	${GTK2_LIBRARIES}
-	${ZLIB_LIBRARIES}
-	${AIO_LIBRARIES}
-	${GCOV_LIBRARIES}
-	${ALSA_LIBRARIES}
-	${SOUNDTOUCH_LIBRARIES}
-	${SDL2_LIBRARIES}
-	${PCAP_LIBRARY}
-	${LIBSAMPLERATE_LIBRARIES}
-	${LIBXML2_LIBRARIES}
+	yaml-cpp
+	chdr-static
+	wxWidgets::all
+	GTK::gtk
+	HarfBuzz::HarfBuzz
+	ZLIB::ZLIB
+	PkgConfig::SOUNDTOUCH
+	SDL::SDL
+	PCAP::PCAP
+	PkgConfig::SAMPLERATE
+	LibXml2::LibXml2
 	${Platform_Libs}
 )
 
 if(PORTAUDIO_FOUND)
-	set(pcsx2FinalLibs ${pcsx2FinalLibs} ${PORTAUDIO_LIBRARIES})
+	set(pcsx2FinalLibs ${pcsx2FinalLibs} PkgConfig::PORTAUDIO)
 endif()
 
 if(PULSEAUDIO_FOUND)
-	set(pcsx2FinalLibs ${pcsx2FinalLibs} ${PULSEAUDIO_LIBRARIES})
+	set(pcsx2FinalLibs ${pcsx2FinalLibs} PulseAudio::PulseAudio)
 endif()
 
 if(BUILTIN_GS)
 	set(pcsx2FinalLibs "${pcsx2FinalLibs} GSdx")
 endif()
-
-# additonal include directories
-include_directories(
-	gui
-	x86
-	${CMAKE_BINARY_DIR}/pcsx2/gui
-)
 
 ### Generate the resources files
 file(MAKE_DIRECTORY ${res_bin})
@@ -1133,11 +1130,19 @@ foreach(res_file IN ITEMS
 endforeach()
 
 if(USE_VTUNE)
-	set(pcsx2FinalLibs ${pcsx2FinalLibs} ${VTUNE_LIBRARIES})
+	set(pcsx2FinalLibs ${pcsx2FinalLibs} Vtune::Vtune)
 endif()
 
 add_pcsx2_executable(${Output} "${pcsx2FinalSources}" "${pcsx2FinalLibs}" "${pcsx2FinalFlags}")
 target_compile_features(${Output} PRIVATE cxx_std_17)
+
+# additonal include directories
+target_include_directories(${Output} PRIVATE
+	gui
+	x86
+	${CMAKE_BINARY_DIR}/pcsx2/gui
+	${CMAKE_BINARY_DIR}/common/include/
+)
 
 if(COMMAND target_precompile_headers)
 	message("Using precompiled headers.")

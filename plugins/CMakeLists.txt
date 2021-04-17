@@ -5,8 +5,7 @@ if(NOT TOP_CMAKE_WAS_SOURCED)
 	It is advice to delete all wrongly generated cmake stuff => CMakeFiles & CMakeCache.txt")
 endif()
 
-
-if(EXISTS "${CMAKE_SOURCE_DIR}/plugins/GSdx" AND GSdx)
+if(EXISTS "${CMAKE_SOURCE_DIR}/plugins/GSdx")
 	add_subdirectory(GSdx)
 endif()
 

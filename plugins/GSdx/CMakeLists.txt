@@ -229,19 +229,29 @@ set(GSdxFinalSources
 )
 
 set(GSdxFinalLibs
-	${X11_LIBRARIES}
-	${OPENGL_LIBRARIES}
-	${EGL_LIBRARIES}
-	${X11_XCB_LIBRARIES}
-	${GTK2_LIBRARIES}
+	OpenGL::GL
+	GTK::gtk
+	HarfBuzz::HarfBuzz
 	${LIBC_LIBRARIES}
-	${PNG_LIBRARIES}
-	${FREETYPE_LIBRARIES}
-	${LIBLZMA_LIBRARIES}
+	PNG::PNG
+	Freetype::Freetype
+	LibLZMA::LibLZMA
 )
 
+if(UNIX)
+	set(GSdxFinalLibs ${GSdxFinalLibs}
+		X11::X11)
+endif()
+
+if(Linux)
+	set(GSdxFinalLibs ${GSdxFinalLibs}
+		PkgConfig::X11_XCB
+		PkgConfig::AIO
+		PkgConfig::EGL)
+endif()
+
 if(USE_VTUNE)
-	set(GSdxFinalLibs ${GSdxFinalLibs} ${VTUNE_LIBRARIES})
+	set(GSdxFinalLibs ${GSdxFinalLibs} Vtune::Vtune)
 endif()
 
 if(APPLE)
@@ -263,7 +273,7 @@ set(RESOURCE_FILES
 
 add_custom_glib_res("GSdxResources" "gsdx-res.xml" "GSdx_res" ${RESOURCE_FILES})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${CMAKE_CURRENT_BINARY_DIR} ../../common/include)
 
 if(BUILTIN_GS)
 	add_pcsx2_lib(${Output} "${GSdxFinalSources}" "${GSdxFinalLibs}" "${GSdxFinalFlags}")
