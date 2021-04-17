@@ -275,6 +275,9 @@ add_custom_glib_res("GSdxResources" "gsdx-res.xml" "GSdx_res" ${RESOURCE_FILES})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ../../common/include)
 
+add_compile_definitions("${PCSX2_DEFS}")
+add_compile_options("${PCSX2_WARNINGS}")
+
 if(BUILTIN_GS)
 	add_pcsx2_lib(${Output} "${GSdxFinalSources}" "${GSdxFinalLibs}" "${GSdxFinalFlags}")
 else()
