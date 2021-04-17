@@ -135,13 +135,18 @@ typedef int64 sint64;
 
 #else
 
-	// Note use GL/glcorearb.h on the future
-	// Requirements:
-	//	* Drop GLX that still include gl.h...
-	//	  EGL/OGL status on AMD GPU pro driver is unknown
-	//	* define all ENABLE_GL_VERSION_1_*
-	#include <GL/gl.h>
-	#include <GL/glext.h>
+	#ifdef __APPLE__
+		#define GL_SILENCE_DEPRECATION
+		#include <OpenGL/gl3.h>
+	#else
+		// Note use GL/glcorearb.h on the future
+		// Requirements:
+		//	* Drop GLX that still include gl.h...
+		//	  EGL/OGL status on AMD GPU pro driver is unknown
+		//	* define all ENABLE_GL_VERSION_1_*
+		#include <GL/gl.h>
+		#include <GL/glext.h>
+	#endif
 	#include "Renderers/OpenGL/GLLoader.h"
 
 	#include <sys/stat.h> // mkdir

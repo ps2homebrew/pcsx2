@@ -23,7 +23,15 @@
 #include "GSdx.h"
 #include "GS.h"
 
-#if defined(__unix__) || defined(__APPLE__)
+#ifdef __APPLE__
+#  undef glScissorIndexed
+#  undef glViewportIndexedf
+PFNGLSCISSORINDEXEDPROC   gs_glScissorIndexed   = glScissorIndexed;
+PFNGLVIEWPORTINDEXEDFPROC gs_glViewportIndexedf = glViewportIndexedf;
+#  define glScissorIndexed   gs_glScissorIndexed
+#  define glViewportIndexedf gs_glViewportIndexedf
+#endif
+#ifdef __unix__
 PFNGLBLENDFUNCSEPARATEPROC glBlendFuncSeparate = NULL;
 #endif
 PFNGLTEXTUREPAGECOMMITMENTEXTPROC glTexturePageCommitmentEXT = NULL;

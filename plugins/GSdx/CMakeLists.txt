@@ -238,7 +238,7 @@ set(GSdxFinalLibs
 	LibLZMA::LibLZMA
 )
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
 	set(GSdxFinalLibs ${GSdxFinalLibs}
 		X11::X11)
 endif()

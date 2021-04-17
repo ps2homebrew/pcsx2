@@ -1050,7 +1050,7 @@ if(Linux)
 		X11::X11
 		ALSA::ALSA
 		)
-elseif(UNIX)
+elseif(UNIX AND NOT APPLE)
 	set(Platform_Libs X11::X11)
 endif()
 
