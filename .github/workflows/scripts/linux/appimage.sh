@@ -42,6 +42,8 @@ chmod a+x ./squashfs-root/AppRun-patched
 echo "$GITHUB_RUN_ID" > /pcsx2/squashfs-root/version.txt
 
 mkdir -p /pcsx2/squashfs-root/usr/bin/plugins
+mkdir -p /pcsx2/squashfs-root/usr/bin/vm
+cp /usr/lib/$ARCH-linux-gnu/libOpenGL.so.0 /pcsx2/squashfs-root/usr/bin/vm/
 find $BUILDBIN/../plugins -iname '*.so' -exec cp {} /pcsx2/squashfs-root/usr/bin/plugins \;
 arr=( $(ls -d /pcsx2/squashfs-root/usr/bin/plugins/* ) )
 for i in "${arr[@]}"; do patchelf --set-rpath /tmp/PCSX2 "$i"; done
