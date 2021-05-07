@@ -53,13 +53,14 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Checkout Submodules
-        run: git submodule update --init --recursive --jobs 2
+        run: git submodule update --init --recursive -j $(sysctl -n hw.activecpu)
 
       - name: Install Packages
         env:
           PLATFORM: ${{ matrix.platform }}
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_ANALYTICS: 1
         run: |
-          export HOMEBREW_NO_INSTALL_CLEANUP=1
           brew update
           brew install sound-touch portaudio wxmac gtk+3 sdl2 libsamplerate
           brew install --cask xquartz # We use its OpenGL headers
@@ -68,5 +69,5 @@ jobs:
         run: cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_BUILD_PO=FALSE -B build .
 
       - name: Build PCSX2
-        working-directory: ./build
-        run: make -j2 # macOS doesn't use make install
+        working-directory: build
+        run: make -j$(sysctl -n hw.activecpu) # macOS doesn't use make install

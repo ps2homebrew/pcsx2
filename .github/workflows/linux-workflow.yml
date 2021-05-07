@@ -74,7 +74,7 @@ jobs:
 
       - name: Checkout Submodules
         if: steps.cache-submodules.outputs.cache-hit != 'true'
-        run: git submodule update --init --recursive --jobs 2
+        run: git submodule update --init --recursive -j $(nproc)
 
       # -- SETUP CCACHE - https://cristianadam.eu/20200113/speeding-up-c-plus-plus-github-actions-using-ccache/
       - name: Prepare ccache timestamp
@@ -89,22 +89,21 @@ jobs:
         with:
           path: .ccache
           key: ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
-          restore-keys: |
-            ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-
+          restore-keys: ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-
 
       - name: Install Packages
         env:
           PLATFORM: ${{ matrix.platform }}
           COMPILER: ${{ matrix.compiler }}
-        run: ./.github/workflows/scripts/linux/install-packages.sh
+        run: .github/workflows/scripts/linux/install-packages.sh
 
       - name: Generate CMake
         env:
           PLATFORM: ${{ matrix.platform }}
           COMPILER: ${{ matrix.compiler }}
           ADDITIONAL_CMAKE_ARGS: ${{ matrix.cmakeflags }}
-        run: ./.github/workflows/scripts/linux/generate-cmake.sh
+        run: .github/workflows/scripts/linux/generate-cmake.sh
 
       - name: Build PCSX2
-        working-directory: ./build
+        working-directory: build
         run: ../.github/workflows/scripts/linux/compile.sh
