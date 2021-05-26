@@ -16,6 +16,6 @@ export CCACHE_MAXSIZE="400M"
 ccache -p
 ccache -z
 # Build
-make -j $(getconf _NPROCESSORS_ONLN) install
+make -j $(nproc --all) install
 # Save the Cache
 ccache -s
