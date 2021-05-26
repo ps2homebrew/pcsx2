@@ -94,7 +94,7 @@ jobs:
           echo "##[set-output name=name;]${TRIMMED_ARTIFACT_NAME}"
 
       - name: Prepare Artifact Folder
-        working-directory: ./build
+        working-directory: build
         run: |
           mv pcsx2 ${{ steps.artifact-metadata.outputs.name }}
           tar -zcvf pcsx2.tar.gz ${{ steps.artifact-metadata.outputs.name }}/PCSX2.app
