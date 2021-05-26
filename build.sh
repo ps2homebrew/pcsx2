@@ -19,9 +19,8 @@
 # Function declarations
 set_ncpu_toolfile()
 {
+    ncpu=$(getconf _NPROCESSORS_ONLN)
     if [ "$(uname -s)" = 'Darwin' ]; then
-        ncpu="$(sysctl -n hw.ncpu)"
-
         # Get the major Darwin/OSX version.
         if [ "$(sysctl -n kern.osrelease | cut -d . -f 1)" -lt 13 ]; then
         echo "This old OSX version is not supported! Build will fail."
@@ -30,10 +29,7 @@ set_ncpu_toolfile()
         echo "Using Mavericks build with C++11 support."
         toolfile=cmake/darwin13-compiler-i386-clang.cmake
         fi
-    elif [ "$(uname -s)" = 'FreeBSD' ]; then
-        ncpu="$(sysctl -n hw.ncpu)"
-    else
-        ncpu=$(nproc)
+    elif [ "$(uname -s)" != 'FreeBSD' ]; then
         toolfile=cmake/linux-compiler-i386-multilib.cmake
     fi
 }
