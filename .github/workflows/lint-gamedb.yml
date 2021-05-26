@@ -2,13 +2,9 @@ name: Validate GameDB
 
 on:
   push:
-    branches:
-      - master
     paths:
       - "**/GameIndex.yaml"
   pull_request:
-    branches:
-      - master
     paths:
       - "**/GameIndex.yaml"
 
