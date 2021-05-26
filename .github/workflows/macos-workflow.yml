@@ -49,7 +49,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Checkout Submodules
-        run: git submodule update --init --recursive -j$(sysctl -n hw.activecpu)
+        run: git submodule update --init --recursive -j $(sysctl -n hw.activecpu)
 
       - name: Install Packages
         env:
@@ -66,7 +66,7 @@ jobs:
 
       - name: Build PCSX2
         working-directory: build
-        run: make -j$(getconf _NPROCESSORS_ONLN) # macOS doesn't use make install
+        run: make -j $(getconf _NPROCESSORS_ONLN) # macOS doesn't use make install
 
       - name: Prepare Artifact Metadata
         id: artifact-metadata
