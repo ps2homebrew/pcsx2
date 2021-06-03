@@ -23,7 +23,6 @@ set_ncpu_toolfile()
     if [ "$(uname -s)" = 'Darwin' ]; then
         i386_flag="-DCMAKE_OSX_ARCHITECTURES=i386"
     else
-        ncpu=$(grep -w -c processor /proc/cpuinfo)
         i386_flag="-DCMAKE_TOOLCHAIN_FILE=cmake/linux-compiler-i386-multilib.cmake"
     fi
 }
