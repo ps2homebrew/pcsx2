@@ -61,6 +61,7 @@ jobs:
             ./3rdparty/libchdr
 
       - name: Checkout Submodules
+        if: steps.cache-submodules.outputs.cache-hit != 'true'
         run: git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
 
       # -- SETUP CCACHE - https://cristianadam.eu/20200113/speeding-up-c-plus-plus-github-actions-using-ccache/
