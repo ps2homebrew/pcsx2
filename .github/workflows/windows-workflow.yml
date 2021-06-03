@@ -4,8 +4,6 @@ name: Windows Build
 # events but only for the master branch
 on:
   push:
-    branches:
-      - master
     paths-ignore:
       - .gitignore
       - "**/*.md"
@@ -14,8 +12,6 @@ on:
       - bin/PCSX2_keys.ini.default
       - "pcsx2/PAD/Linux/**"
   pull_request:
-    branches:
-      - master
     paths-ignore:
       - .gitignore
       - "**/*.md"
@@ -46,29 +42,28 @@ jobs:
     # Set some sort of timeout in the event of run-away builds.  We are limited on concurrent jobs so, get rid of them.
     timeout-minutes: 30
 
+    env:
+      POWERSHELL_TELEMETRY_OPTOUT: 1
+
     steps:
       # NOTE - useful for debugging
       # - name: Dump GitHub context
       #   env:
       #     GITHUB_CONTEXT: ${{ toJson(github) }}
-      #   run: |
-      #     echo "$GITHUB_CONTEXT"
+      #   run: echo "$GITHUB_CONTEXT"
 
       - name: Checkout Repository
         uses: actions/checkout@v2
 
       - name: Checkout Submodules
         if: steps.cache-submodules.outputs.cache-hit != 'true'
-        run: git submodule update --init --recursive --jobs 2
+        run: git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
 
       - name: Verify VS Project Files
-        shell: powershell
-        run: .\.github\workflows\scripts\windows\validate-vs-filters.ps1
+        run: .github\workflows\scripts\windows\validate-vs-filters.ps1
 
       - name: Setup msbuild
-        uses: microsoft/setup-msbuild@v1.0.2
-        with:
-          vs-version: 16.7
+        uses: microsoft/setup-msbuild@v1
 
       - name: Build PCSX2
         env:
@@ -104,10 +99,10 @@ jobs:
 
       - name: Prepare Artifact Folder
         shell: bash
-        working-directory: ./bin
+        working-directory: bin
         run: |
           shopt -s extglob dotglob
-          mkdir "${{ steps.artifact-metadata.outputs.name }}"
+          mkdir -p "${{ steps.artifact-metadata.outputs.name }}"
           mv !("${{ steps.artifact-metadata.outputs.name }}") "${{ steps.artifact-metadata.outputs.name }}"
           shopt -u dotglob
 
