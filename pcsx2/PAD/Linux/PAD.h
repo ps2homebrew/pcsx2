@@ -110,7 +110,7 @@ enum gamePadValues
 #include "bitwise.h"
 #include "controller.h"
 #include "KeyStatus.h"
-#include "mt_queue.h"
+#include "Utilities/mt_queue.h"
 
 extern FILE* padLog;
 extern void initLogging();

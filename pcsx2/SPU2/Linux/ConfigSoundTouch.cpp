@@ -17,7 +17,7 @@
 #include "../Global.h"
 #include "Dialogs.h"
 #include "Config.h"
-#include "soundtouch/SoundTouch.h"
+#include "SoundTouch.h"
 
 namespace SoundtouchCfg
 {
