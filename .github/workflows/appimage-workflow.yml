@@ -1,0 +1,139 @@
+name: AppImage Build
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - .gitignore
+      - "**/*.md"
+      - .clang-format
+      - debian-packager/
+      - bin/PCSX2_keys.ini.default
+      - "pcsx2/PAD/Windows/**"
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - .gitignore
+      - "**/*.md"
+      - .clang-format
+      - debian-packager/
+      - bin/PCSX2_keys.ini.default
+      - "pcsx2/PAD/Windows/**"
+
+jobs:
+  build:
+    strategy:
+      # Prevent one build from failing everything (although maybe those should be included as experimental builds instead)
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-18.04
+            platform: x86
+            compiler: gcc
+            detail: -appimage
+            experimental: true
+          - os: ubuntu-18.04
+            platform: x64
+            compiler: gcc
+            experimental: true
+            detail: -appimage 
+
+    name: ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}
+    runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
+    # Set some sort of timeout in the event of run-away builds.  We are limited on concurrent jobs so, get rid of them.
+    timeout-minutes: 30
+
+    steps:
+      # NOTE - useful for debugging
+      # - name: Dump GitHub context
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
+      #   run: |
+      #     echo "$GITHUB_CONTEXT"
+      #     echo ${{ github.event.pull_request.title }}
+
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Cache Submodules
+        id: cache-submodules
+        uses: actions/cache@v2.1.4
+        with:
+          key: submodules-${{ hashFiles('./.gitmodules') }}
+          path: |
+            ./.git/modules/
+            ./3rdparty/fmt
+            ./3rdparty/xz
+            ./3rdparty/yaml-cpp
+            ./3rdparty/gtest
+
+      - name: Checkout Submodules
+        if: steps.cache-submodules.outputs.cache-hit != 'true'
+        run: git submodule update --init --recursive --jobs 2
+
+      # -- SETUP CCACHE - https://cristianadam.eu/20200113/speeding-up-c-plus-plus-github-actions-using-ccache/
+      - name: Prepare ccache timestamp
+        id: ccache_cache_timestamp
+        shell: cmake -P {0}
+        run: |
+          string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
+          message("::set-output name=timestamp::${current_date}")
+
+      - name: ccache cache files
+        uses: actions/cache@v2.1.4
+        with:
+          path: .ccache
+          key: ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+          restore-keys: |
+            ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-
+
+      - name: Prepare Artifact Metadata
+        id: artifact-metadata
+        shell: bash
+        run: |
+          ARCH=$([ "${{ matrix.platform }}" == x86 ] && echo "32bit" || echo "64bit")
+          ARTIFACT_NAME=""
+          if [ ${{ github.event_name }} == "pull_request" ]; then
+            PR_SHA=$(git rev-parse --short "${{ github.event.pull_request.head.sha }}")
+            ARTIFACT_NAME="PCSX2-${ARCH}"
+            if [ ! -z "${{ github.event.pull_request.number }}" ]; then
+              PR_NUM=${{ github.event.pull_request.number }}
+              ARTIFACT_NAME="${ARTIFACT_NAME}-pr[${PR_NUM}]"
+            fi
+            ARTIFACT_NAME="${ARTIFACT_NAME}-sha[${PR_SHA}]"
+            if [ ! -z "${{ github.event.pull_request.title }}" ]; then
+              PR_TITLE=$(echo "${{ github.event.pull_request.title }}" | tr -cd '[a-zA-Z0-9[:space:]]_-')
+              ARTIFACT_NAME="${ARTIFACT_NAME}-title["${PR_TITLE}""
+            fi
+          else
+            SHA=$(git rev-parse --short "$GITHUB_SHA")
+            ARTIFACT_NAME="PCSX2-${ARCH}-sha[${SHA}"
+          fi
+          TRIMMED_ARTIFACT_NAME=$(printf "%.199s]" "$ARTIFACT_NAME")
+          echo "name=$TRIMMED_ARTIFACT_NAME"
+          echo "##[set-output name=name;]${TRIMMED_ARTIFACT_NAME}"
+          
+      - name: Build AppImage
+        env:
+          PLATFORM: ${{ matrix.platform }}
+          COMPILER: ${{ matrix.compiler }}
+          name: ${{ steps.artifact-metadata.outputs.name }}
+        run: |
+          if [ ${{ matrix.platform }} = x86 ]; then 
+              docker pull quriouspixel/pcsx2:18.04-386
+              docker run -u root --env-file .github/workflows/scripts/linux/docker.env -v $(pwd):/pcsx2 -v "$GITHUB_WORKSPACE/.ccache":/root/.ccache quriouspixel/pcsx2:18.04-386 /bin/bash /pcsx2/.github/workflows/scripts/linux/docker.sh
+          else
+              docker pull quriouspixel/pcsx2:18.04
+              docker run -u root --env-file .github/workflows/scripts/linux/docker.env -v $(pwd):/pcsx2 -v "$GITHUB_WORKSPACE/.ccache":/root/.ccache quriouspixel/pcsx2:18.04 /bin/bash /pcsx2/.github/workflows/scripts/linux/docker.sh
+          fi   
+        
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ steps.artifact-metadata.outputs.name }}
+          path: artifacts
