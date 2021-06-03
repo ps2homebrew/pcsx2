@@ -21,7 +21,7 @@
 
 #include "stdafx.h"
 #include "GSRenderer.h"
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(__unix__)
 #include <X11/keysym.h>
 #endif
 
@@ -553,6 +553,7 @@ void GSRenderer::EndCapture()
 
 void GSRenderer::KeyEvent(GSKeyEventData* e)
 {
+#ifndef __APPLE__ // TODO: Add hotkey support on macOS
 #ifdef _WIN32
 	m_shift_key = !!(::GetAsyncKeyState(VK_SHIFT) & 0x8000);
 	m_control_key = !!(::GetAsyncKeyState(VK_CONTROL) & 0x8000);
@@ -575,7 +576,7 @@ void GSRenderer::KeyEvent(GSKeyEventData* e)
 
 		int step = m_shift_key ? -1 : 1;
 
-#if defined(__unix__) || defined(__APPLE__)
+#if defined(__unix__)
 #define VK_F5 XK_F5
 #define VK_F6 XK_F6
 #define VK_DELETE XK_Delete
@@ -623,6 +624,7 @@ void GSRenderer::KeyEvent(GSKeyEventData* e)
 				return;
 		}
 	}
+#endif // __APPLE__
 }
 
 void GSRenderer::PurgePool()
