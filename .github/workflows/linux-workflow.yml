@@ -1,7 +1,6 @@
 name: Linux Build
 
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
+# Controls when the action will run. Triggers the workflow on push or pull request events
 on:
   push:
     paths-ignore:
@@ -27,15 +26,15 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             platform: x86
             compiler: gcc
             experimental: false
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             platform: x64
             compiler: gcc
             experimental: false
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             platform: x86
             compiler: clang
             # Need to disable PCH until cmake 3.17
@@ -43,7 +42,7 @@ jobs:
             cmakeflags: -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
             detail: -nopch
             experimental: false
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             platform: x86
             compiler: gcc
             cmakeflags: -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON
@@ -68,6 +67,19 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
+      - name: Cache Submodules
+        id: cache-submodules
+        uses: actions/cache@v2
+        with:
+          key: submodules-${{ hashFiles('./.gitmodules') }}
+          path: |
+            ./.git/modules/
+            ./3rdparty/fmt
+            ./3rdparty/xz
+            ./3rdparty/yaml-cpp
+            ./3rdparty/gtest
+            ./3rdparty/libchdr
+
       - name: Checkout Submodules
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         run: git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
@@ -81,7 +93,7 @@ jobs:
           message("::set-output name=timestamp::${current_date}")
 
       - name: ccache cache files
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2
         with:
           path: .ccache
           key: ${{ matrix.os }}-${{ matrix.platform }}-${{ matrix.compiler }}${{ matrix.detail }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
@@ -131,7 +143,7 @@ jobs:
 
       - name: Prepare Artifact Folder
         run: |
-          mv bin ${{ steps.artifact-metadata.outputs.name }}
+          mv bin "${{ steps.artifact-metadata.outputs.name }}"
           tar -zcvf pcsx2.tar.gz ${{ steps.artifact-metadata.outputs.name }}
 
       - name: Upload artifact

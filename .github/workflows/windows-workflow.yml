@@ -32,7 +32,7 @@ jobs:
       # Prevent one build from failing everything (although maybe those should be included as experimental builds instead)
       fail-fast: false
       matrix:
-        os: [windows-2019]
+        os: [windows-latest]
         platform: [Win32, x64]
         experimental: [false]
 
@@ -69,6 +69,7 @@ jobs:
         env:
           # Set to 'true' to retain the .pdb / .exp / .lib, etc files which can be useful for repro'ing issues that only occur in the compiled .exe
           RetainDebuggingArtifacts: ${{ github.event.inputs.retainDebugArtifacts == 'true' }}
+        # added :Rebuild as temporar fix for windows
         run: msbuild "buildbot.xml" /m /v:n /t:ReleaseAll /p:Platform=${{ matrix.platform }}
 
       - name: Prepare Artifact Metadata
