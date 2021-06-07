@@ -69,8 +69,6 @@ jobs:
 
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1
-        with:
-          vs-version: '[16.9,16.10)'
 
       - name: Build PCSX2
         env:
