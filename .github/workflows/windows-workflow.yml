@@ -59,7 +59,9 @@ jobs:
 
       - name: Checkout Submodules
         if: steps.cache-submodules.outputs.cache-hit != 'true'
-        run: git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
+        run: |
+          git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
+          choco install visualstudio2019buildtools --version=16.9.5.0 --force --allow-downgrade
         
       - name: Verify VS Project Files
         run: .github\workflows\scripts\windows\validate-vs-filters.ps1
