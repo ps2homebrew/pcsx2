@@ -34,7 +34,7 @@ jobs:
       matrix:
         # os: [windows-latest]
         # temporary fix until it will be fixed
-        os: [windows-2016]
+        os: [windows-latest]
         platform: [Win32, x64]
         experimental: [false]
 
@@ -60,12 +60,14 @@ jobs:
       - name: Checkout Submodules
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         run: git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
-
+        
       - name: Verify VS Project Files
         run: .github\workflows\scripts\windows\validate-vs-filters.ps1
 
       - name: Setup msbuild
         uses: microsoft/setup-msbuild@v1
+        with:
+          vs-version: '[16.9,16.10)'
 
       - name: Build PCSX2
         env:
