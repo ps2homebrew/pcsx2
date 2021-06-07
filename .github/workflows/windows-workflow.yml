@@ -61,6 +61,7 @@ jobs:
         if: steps.cache-submodules.outputs.cache-hit != 'true'
         run: |
           git submodule update --init --recursive -j $(getconf _NPROCESSORS_ONLN)
+          choco uninstall -f visualstudio2019buildtools
           choco install visualstudio2019buildtools --version=16.9.5.0 --force --allow-downgrade
         
       - name: Verify VS Project Files
