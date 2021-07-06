@@ -22,7 +22,6 @@
     <ProjectGuid>{47AFDBEF-F15F-4BC0-B436-5BE443C3F80F}</ProjectGuid>
     <RootNamespace>libsamplerate</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">

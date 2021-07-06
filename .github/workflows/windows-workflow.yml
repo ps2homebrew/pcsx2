@@ -32,7 +32,9 @@ jobs:
       # Prevent one build from failing everything (although maybe those should be included as experimental builds instead)
       fail-fast: false
       matrix:
-        os: [windows-latest]
+        # os: [windows-latest]
+        # temporary fix until it will be fixed
+        os: [windows-2016]
         platform: [Win32, x64]
         experimental: [false]
 
