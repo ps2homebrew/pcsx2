@@ -311,7 +311,6 @@ bool LoadBIOS()
 
 	LoadExtraRom("rom1", eeMem->ROM1);
 	LoadExtraRom("rom2", eeMem->ROM2);
-	LoadExtraRom("erom", eeMem->EROM);
 
 	if (EmuConfig.CurrentIRX.length() > 3)
 		LoadIrx(EmuConfig.CurrentIRX, &eeMem->ROM[0x3C0000], sizeof(eeMem->ROM) - 0x3C0000);
