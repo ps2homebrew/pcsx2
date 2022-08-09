@@ -721,10 +721,17 @@ struct PSMain
 		return selector == 0 ? zero : selector == 1 ? one : two;
 	}
 
-	void ps_blend(thread float4& Color, float As)
+	void ps_blend(thread float4& Color, thread float& As)
 	{
 		if (SW_BLEND)
 		{
+			// PABE
+			if (PS_PABE)
+			{
+				// No blending so early exit
+				if (As < 1.f)
+					return;
+			}
 
 			float Ad = PS_DFMT == FMT_24 ? 1.f : trunc(current_color.a * 255.5f) / 128.f;
 
@@ -736,7 +743,9 @@ struct PSMain
 			float  C = pick(PS_BLEND_C, As, Ad, cb.alpha_fix);
 			float3 D = pick(PS_BLEND_D, Cs, Cd, float3(0.f));
 
-			if (PS_BLEND_MIX)
+			// As/Af clamp alpha for Blend mix
+			// We shouldn't clamp blend mix with clr1 as we want alpha higher
+			if (PS_BLEND_MIX && PS_CLR_HW != 1)
 				C = min(C, 1.f);
 
 			if (PS_BLEND_A == PS_BLEND_B)
@@ -744,8 +753,20 @@ struct PSMain
 			else
 				Color.rgb = trunc((A - B) * C + D);
 
-			if (PS_PABE)
-				Color.rgb = (As >= 1.f) ? Color.rgb : Cs;
+			if (PS_CLR_HW == 1)
+			{
+				// Replace Af with As so we can do proper compensation for Alpha.
+				if (PS_BLEND_C == 2)
+					As = cb.alpha_fix;
+				// Subtract 1 for alpha to compensate for the changed equation,
+				// if c.rgb > 255.0f then we further need to adjust alpha accordingly,
+				// we pick the lowest overflow from all colors because it's the safest,
+				// we divide by 255 the color because we don't know Cd value,
+				// changed alpha should only be done for hw blend.
+				float min_color = min(min(Color.r, Color.g), Color.b);
+				float alpha_compensate = max(1.f, min_color / 255.f);
+				As -= alpha_compensate;
+			}
 		}
 		else
 		{
